@@ -1,4 +1,5 @@
 use std::io;
+use std::process::Command;
 
 fn main() {
     let mut online = true;
@@ -10,7 +11,7 @@ fn main() {
 
     io::stdin().read_line(&mut target).expect("Failed to read line");
 
-    loop {
+    //loop {
         if ping_check (&target) {
             if offline {
                 println! ("target is online");
@@ -22,7 +23,7 @@ fn main() {
             offline = true;
             online = false;
         }
-    }
+    //}
 }
 
 fn ping_check (target: &String) -> bool {
@@ -31,6 +32,7 @@ fn ping_check (target: &String) -> bool {
     if string_search ("from", &ping_result) || 
     string_search ("From", &ping_result) ||
     string_search ("FROM", &ping_result) {
+        println!("ping_check true");
         return true
     } else {
         return false
@@ -38,16 +40,29 @@ fn ping_check (target: &String) -> bool {
 }
 
 fn ping (target: &String) -> String {
-    //TODO: Send ping request to target and return resulting string
-
-    //Temporary compile code
-    let temp = String::new();
-    temp
+    let ping_result = if cfg! (target_os = "windows") {
+        Command::new ("ping")
+                .arg ("/n 1")
+                .arg (target)
+                .output()
+                .expect("ping command failed to start")
+    } else {
+        Command::new ("ping")
+                .arg ("-c 1")
+                .arg (target)
+                .output()
+                .expect("ping command failed to start")
+    };
+    
+    let output = String::from_utf8(ping_result.stdout).expect("Failed to convert");
+    println!("ping_result: {}", output);
+    output.to_string()
 }
 
 fn string_search (word: &str, string: &String) -> bool {
-    //TODO: Search string for inputted word
+    let word = word.to_string();
 
-    //Temporary compile code
-    true
+    let split: Vec<&str> = string.split(&word).collect();
+    println!("split {}", split[0]);
+    split.len() > 1
 }
