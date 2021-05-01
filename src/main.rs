@@ -11,7 +11,7 @@ fn main() {
 
     io::stdin().read_line(&mut target).expect("Failed to read line");
 
-    //loop {
+    loop {
         if ping_check (&target) {
             if offline {
                 println! ("target is online");
@@ -23,7 +23,7 @@ fn main() {
             offline = true;
             online = false;
         }
-    //}
+    }
 }
 
 fn ping_check (target: &String) -> bool {
@@ -32,7 +32,6 @@ fn ping_check (target: &String) -> bool {
     if string_search ("from", &ping_result) || 
     string_search ("From", &ping_result) ||
     string_search ("FROM", &ping_result) {
-        println!("ping_check true");
         return true
     } else {
         return false
@@ -40,29 +39,29 @@ fn ping_check (target: &String) -> bool {
 }
 
 fn ping (target: &String) -> String {
-    let ping_result = if cfg! (target_os = "windows") {
-        Command::new ("ping")
-                .arg ("/n 1")
-                .arg (target)
+    let ping = if cfg! (target_os = "windows") {
+        let command = String::from("ping /n 1 ") + target;
+        Command::new ("cmd")
+                .args (&["/C", &command[..]])
                 .output()
                 .expect("ping command failed to start")
     } else {
-        Command::new ("ping")
-                .arg ("-c 1")
-                .arg (target)
+        let command = String::from("ping -c 1 ") + target;
+        Command::new ("sh")
+                .arg ("-c")
+                .arg (command)
                 .output()
                 .expect("ping command failed to start")
     };
     
-    let output = String::from_utf8(ping_result.stdout).expect("Failed to convert");
-    println!("ping_result: {}", output);
-    output.to_string()
+    let ping_result = ping.stdout;
+    
+    String::from_utf8 (ping_result).expect("Failed to convert")
 }
 
 fn string_search (word: &str, string: &String) -> bool {
     let word = word.to_string();
 
     let split: Vec<&str> = string.split(&word).collect();
-    println!("split {}", split[0]);
     split.len() > 1
 }
