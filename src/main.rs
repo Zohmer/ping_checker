@@ -1,15 +1,21 @@
-use std::io;
+use std::{io, time::Duration};
 use std::process::Command;
+use std::thread;
 
 fn main() {
     let mut online = false;
     let mut first_run = true;
 
     println!("Enter target: ");
-
     let mut target: String = String::new();
-
     io::stdin().read_line(&mut target).expect("Failed to read line");
+
+    println!("Enter ping request delay: ");
+    let mut delay = String::new();
+    io::stdin().read_line(&mut delay).expect("Failed to read line");
+
+    let delay: u64 = delay.trim().parse().expect("Failed to convert");
+    let delay_duration: Duration = Duration::from_secs(delay);
 
     loop {
         if ping_check (&target) {
@@ -22,6 +28,7 @@ fn main() {
             online = false;
         }
 
+        thread::sleep(delay_duration);
         first_run = false;
     }
 }
