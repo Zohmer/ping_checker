@@ -2,8 +2,8 @@ use std::io;
 use std::process::Command;
 
 fn main() {
-    let mut online = true;
-    let mut offline = true;
+    let mut online = false;
+    let mut first_run = true;
 
     println!("Enter target: ");
 
@@ -13,25 +13,23 @@ fn main() {
 
     loop {
         if ping_check (&target) {
-            if offline {
+            if !online {
                 println! ("target is online");
-                offline = false;
                 online = true;
             }
-        } else if online {
+        } else if online  || first_run{
             println! ("target is offline");
-            offline = true;
             online = false;
         }
+
+        first_run = false;
     }
 }
 
 fn ping_check (target: &String) -> bool {
     let ping_result = ping(target);
 
-    if string_search ("from", &ping_result) || 
-    string_search ("From", &ping_result) ||
-    string_search ("FROM", &ping_result) {
+    if string_search ("from", &ping_result) {
         return true
     } else {
         return false
@@ -60,7 +58,8 @@ fn ping (target: &String) -> String {
 }
 
 fn string_search (word: &str, string: &String) -> bool {
-    let word = word.to_string();
+    let word = word.to_string().to_lowercase();
+    let string = string.to_lowercase();
 
     let split: Vec<&str> = string.split(&word).collect();
     split.len() > 1
